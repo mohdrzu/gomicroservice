@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/mohdrzu/gomicroservice/handlers"
 )
@@ -17,6 +18,14 @@ func main() {
 	serveMux.Handle("/hello", helloHandler)
 	serveMux.Handle("/goodbye", goodbyeHandler)
 
+	server := &http.Server{
+		Addr: ":9090",
+		Handler: serveMux,
+		IdleTimeout: 120 * time.Second,
+		ReadTimeout: 1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+	}
 	
-	http.ListenAndServe(":9090", serveMux)
+
+	server.ListenAndServe()
 }
