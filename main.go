@@ -14,12 +14,10 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "gomicroservice-api -> ", log.LstdFlags)
-	helloHandler := handlers.NewHello(l)
-	goodbyeHandler := handlers.NewGoodbye(l)
+	productHandler := handlers.NewProduct(l)
 
 	serveMux := http.NewServeMux()
-	serveMux.Handle("/hello", helloHandler)
-	serveMux.Handle("/goodbye", goodbyeHandler)
+	serveMux.Handle("/product", productHandler)
 
 	server := &http.Server{
 		Addr: ":9090",
@@ -30,9 +28,12 @@ func main() {
 	}
 	
 	go func ()  {
+		l.Println("starting server on port 9090")
+
 		err := server.ListenAndServe()
 		if err != nil {
-			l.Fatal(err)
+			l.Printf("error starting server at: %s\n", err)
+			os.Exit(1)
 		}	
 	}()
 	
@@ -43,6 +44,8 @@ func main() {
 	sig := <- sigChan 
 	l.Println("received terminate, graceful shutdown", sig)
 
-	tc, _ := context.WithTimeout(context.Background(), 30 * time.Second)
+	tc, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+	defer cancel()
+	
 	server.Shutdown(tc)
 }
