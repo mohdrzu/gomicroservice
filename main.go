@@ -22,11 +22,13 @@ func main() {
 	getRouter := serveMux.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", productHandler.GetProduct)
 
-	addRouter := serveMux.Methods(http.MethodPost).Subrouter()
-	addRouter.HandleFunc("/", productHandler.AddProduct)
+	postRouter := serveMux.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", productHandler.AddProduct)
+	postRouter.Use(productHandler.MiddlewareValidateProduct)
 
 	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
+	putRouter.Use(productHandler.MiddlewareValidateProduct)
 
 	server := &http.Server{
 		Addr: ":9090",
