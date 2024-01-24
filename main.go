@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/mohdrzu/gomicroservice/handlers"
 )
 
@@ -16,8 +17,16 @@ func main() {
 	l := log.New(os.Stdout, "gomicroservice-api -> ", log.LstdFlags)
 	productHandler := handlers.NewProduct(l)
 
-	serveMux := http.NewServeMux()
-	serveMux.Handle("/product", productHandler)
+	serveMux := mux.NewRouter()
+
+	getRouter := serveMux.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", productHandler.GetProduct)
+
+	addRouter := serveMux.Methods(http.MethodPost).Subrouter()
+	addRouter.HandleFunc("/", productHandler.AddProduct)
+
+	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
 
 	server := &http.Server{
 		Addr: ":9090",
